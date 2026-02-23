@@ -3,7 +3,7 @@ package com.financas.gestao_financeira.model;
 import jakarta.persistence.*;
 import lombok.Data;
 
-import javax.annotation.processing.Generated;
+import java.util.UUID;
 import java.math.BigDecimal;
 
 
@@ -12,9 +12,8 @@ import java.math.BigDecimal;
 @Table(name = "Contas")
 public class ContaModel {
     @Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private Long id;
-
+    @GeneratedValue(strategy = GenerationType.AUTO)
+    private UUID id;
     @Column(nullable = false)
     private String nome;
 
