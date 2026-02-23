@@ -13,5 +13,5 @@ public class CategoriaModel {
     private String nome;
 
     @Enumerated(EnumType.STRING)
-    private tipoCategoria tipo;
+    private TipoCategoria tipo;
 }
