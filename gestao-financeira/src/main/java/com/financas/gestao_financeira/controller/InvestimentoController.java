@@ -11,7 +11,7 @@ import java.util.UUID;
 
 @RestController
 @RequestMapping("/investimentos")
-public class InvestimetnoController {
+public class InvestimentoController {
     @Autowired
     private InvestimentoService investimentoService;
 
