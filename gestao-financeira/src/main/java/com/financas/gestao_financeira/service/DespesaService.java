@@ -21,22 +21,54 @@ public class DespesaService {
     private ContaRepository contaRepository;
 
     @Transactional
-    public DespesaModel salvar(DespesaModel despesa){
-        ContaModel conta = despesa.getConta();
-
-        if (conta == null || conta.getId() == null){
+    public void salvar(DespesaModel despesa) {
+        if (despesa.getConta() == null || despesa.getConta().getId() == null) {
             throw new RuntimeException("A despesa deve estar associada a uma conta válida.");
         }
 
-        UUID contaId = conta.getId();
+        int total = (despesa.getTotalParcelas() != null && despesa.getTotalParcelas() > 1)
+                ? despesa.getTotalParcelas() : 1;
 
-        ContaModel contaBanco = contaRepository.findById(contaId)
+        if (total > 1) {
+            salvarDespesaParcelada(despesa, total);
+        } else {
+            despesa.setParcelaAtual(1);
+            despesa.setTotalParcelas(1);
+            processarSalvarUnico(despesa);
+        }
+    }
+
+    private void salvarDespesaParcelada(DespesaModel despesaOriginal, int total) {
+        String grupamentoId = UUID.randomUUID().toString();
+
+        for (int i = 1; i <= total; i++) {
+            DespesaModel parcela = new DespesaModel();
+
+            parcela.setValor(despesaOriginal.getValor());
+            parcela.setDescricao(despesaOriginal.getDescricao() + " (" + i + "/" + total + ")");
+            parcela.setCategoria(despesaOriginal.getCategoria());
+            parcela.setUsuario(despesaOriginal.getUsuario());
+            parcela.setConta(despesaOriginal.getConta());
+            parcela.setFormaPagamento(despesaOriginal.getFormaPagamento());
+
+            parcela.setData(despesaOriginal.getData().plusMonths(i - 1));
+
+            parcela.setParcelaAtual(i);
+            parcela.setTotalParcelas(total);
+            parcela.setIdentificadorGrupamento(grupamentoId);
+
+            processarSalvarUnico(parcela);
+        }
+    }
+
+    private void processarSalvarUnico(DespesaModel despesa) {
+        ContaModel contaBanco = contaRepository.findById(despesa.getConta().getId())
                 .orElseThrow(() -> new RuntimeException("Conta não encontrada."));
 
         contaBanco.setSaldo(contaBanco.getSaldo().subtract(despesa.getValor()));
-        contaRepository.save(contaBanco);
 
-        return despesaRepository.save(despesa);
+        contaRepository.save(contaBanco);
+        despesaRepository.save(despesa);
     }
 
     public List<DespesaModel> listar(){

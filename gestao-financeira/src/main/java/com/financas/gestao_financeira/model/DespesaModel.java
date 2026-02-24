@@ -19,6 +19,9 @@ public class DespesaModel {
     private String descricao;
     private LocalDate data;
 
+    private Integer parcelaAtual;
+    private Integer totalParcelas;
+    private String identificadorGrupamento;
     @ManyToOne
     @JoinColumn(name = "categoria_id")
     private CategoriaModel categoria;
